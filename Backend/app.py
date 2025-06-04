@@ -83,11 +83,13 @@ def get_weather(lat, lon, units='imperial'):
 
     city = reverse_geocode(lat, lon)
 
+    wind_speed_val = wind_mps * (2.23694 if units == "imperial" else 1)
+
     return {
         "city": city,
         "actual_temperature": round(convert_c_to_unit(temp_c), 1),
         "feels_like_temperature": round(convert_c_to_unit(feels_like_c), 1),
-        "wind_speed": round(data['current']['wind_speed_10m'] * 0.6),
+        "wind_speed": round(wind_speed_val),
         "precipitation": round(precip_chance),
         "rain_chance" : round(rain_chance),
         "precip_mm" : round(precip_mm),
