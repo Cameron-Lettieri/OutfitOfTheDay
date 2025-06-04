@@ -108,55 +108,61 @@ def get_weather(lat, lon, units='imperial'):
 def suggest_outfit(temp, units, wind, rain, humidity, cloud, time_of_day):
     outfit = []
     accessories = []
+    outerwear = []
 
-    def add_items(*items):
-        for i in items:
-            if i and i not in outfit:
-                outfit.append(i)
-
+    # Select one top
     if temp < 32:
-        add_items("Thermal base layer", "Heavy sweater")
+        top = "Thermal base layer"
+        outerwear.append("Heavy sweater")
     elif temp < 50:
-        add_items("Long sleeve shirt", "Sweater")
+        top = "Long sleeve shirt"
+        outerwear.append("Sweater")
     elif temp < 65:
-        add_items("Long sleeve shirt")
+        top = "Long sleeve shirt"
     elif temp < 75:
-        add_items("Short sleeve t-shirt")
+        top = "Short sleeve T-shirt"
     else:
-        add_items("T-shirt", "Tank top")
+        top = "T-shirt"
+    outfit.append(top)
 
+    # Select one bottom
     if temp < 35:
-        add_items("Thermal leggings", "Wool pants")
+        bottom = "Wool pants"
+        outerwear.append("Thermal leggings")
     elif temp < 55:
-        add_items("Chinos or jeans")
+        bottom = "Chinos or jeans"
     elif temp < 75:
-        add_items("Joggers", "Light pants")
+        bottom = "Light pants"
     else:
-        add_items("Shorts")
+        bottom = "Shorts"
+    outfit.append(bottom)
 
+    # Outerwear items
     if temp < 30:
-        add_items("Heavy winter coat")
+        outerwear.append("Heavy winter coat")
     elif temp < 50:
-        add_items("Insulated jacket")
+        outerwear.append("Insulated jacket")
     elif temp < 65:
-        add_items("Light jacket")
+        outerwear.append("Light jacket")
     elif wind > 20:
-        add_items("Windbreaker")
-
+        outerwear.append("Windbreaker")
     if rain > 50:
-        add_items("Raincoat")
+        outerwear.append("Raincoat")
         accessories.append("Umbrella")
 
+    # One pair of shoes
     if temp < 32:
-        add_items("Insulated boots")
+        shoes = "Insulated boots"
     elif rain > 50:
-        add_items("Waterproof boots")
+        shoes = "Waterproof boots"
     else:
-        add_items("Sneakers")
+        shoes = "Sneakers"
+    outfit.append(shoes)
+
+    outfit.extend(outerwear)
 
     if cloud < 20 and time_of_day != "night":
         accessories.append("Sunglasses")
-
     if temp < 32:
         accessories += ["Scarf", "Gloves", "Beanie"]
     elif time_of_day == "night" and temp < 50:
