@@ -52,9 +52,10 @@ class _WeatherPageState extends State<WeatherPage> {
   double? humidity;
   double? cloudCover;
   double? windSpeed;
-  double? precipitation;
+  double? precipitationAmount;
   int? rainChance;
   int? uvIndex;
+  bool isImperial = true;
   List<dynamic>? outfitMorning;
   List<dynamic>? outfitAfternoon;
   List<dynamic>? outfitNight;
@@ -108,8 +109,11 @@ class _WeatherPageState extends State<WeatherPage> {
         humidity = (data['humidity'] as num?)?.toDouble();
         cloudCover = (data['cloud_cover'] as num?)?.toDouble();
         windSpeed = (data['wind_speed'] as num?)?.toDouble();
-        precipitation = (data['precipitation'] as num?)?.toDouble();
-        rainChance = (data['rain_chance'] as num?)?.toInt();
+        precipitationAmount =
+            (data['precipitation'] as num?)?.toDouble();
+        rainChance =
+            (data['precipitation_probability'] as num?)?.toInt();
+        isImperial = (data['units'] ?? '°F') == '°F';
         uvIndex = (data['uv_index'] as num?)?.toInt();
         
         // base outfit suggestions
@@ -131,7 +135,8 @@ class _WeatherPageState extends State<WeatherPage> {
       final recs = await RecommendationService.recommend(
         temp: feelsLikeTemperature ?? actualTemperature ?? 0.0,
         uvIndex: uvIndex ?? 0,
-        precipitationMm: precipitation ?? 0.0,
+        precipitationMm:
+            isImperial ? (precipitationAmount ?? 0.0) * 25.4 : precipitationAmount ?? 0.0,
         precipitationProb: rainChance ?? 0,
         topN: 5,
       );
@@ -162,7 +167,8 @@ class _WeatherPageState extends State<WeatherPage> {
     } else if (cloudCover! > 30) summary += "Partly cloudy throughout the day. ";
     else summary += "Plenty of sunshine today. ";
     if (windSpeed! > 15) summary += "It may be windy, so plan accordingly. ";
-    if (precipitation! > 1) summary += "Carry an umbrella just in case.";
+    if (precipitationAmount! > (isImperial ? 0.1 : 2))
+      summary += "Carry an umbrella just in case.";
     return summary;
   }
 
@@ -197,7 +203,8 @@ class _WeatherPageState extends State<WeatherPage> {
   }
 
   IconData getWeatherIcon() {
-    if (precipitation != null && precipitation! > 2) return WeatherIcons.rain;
+    if (precipitationAmount != null && precipitationAmount! > 0.1)
+      return WeatherIcons.rain;
     if (cloudCover != null && cloudCover! > 80) return WeatherIcons.cloudy;
     if (cloudCover != null && cloudCover! > 40) return WeatherIcons.day_cloudy;
     if (windSpeed != null && windSpeed! > 20) return WeatherIcons.strong_wind;
@@ -289,7 +296,7 @@ class _WeatherPageState extends State<WeatherPage> {
                               Text('💧 Humidity: ${humidity?.toStringAsFixed(0)}%', style: TextStyle(color: Colors.white)),
                               Text('☁️ Cloud Cover: ${cloudCover?.toStringAsFixed(0)}%', style: TextStyle(color: Colors.white)),
                               Text('🌬 Wind: ${windSpeed?.toStringAsFixed(1)} mph', style: TextStyle(color: Colors.white)),
-                              Text('🌧 Precipitation: ${precipitation?.toStringAsFixed(1)} mm (${rainChance ?? 0}%)', style: TextStyle(color: Colors.white)),
+                              Text('🌧 Precipitation: ${precipitationAmount?.toStringAsFixed(2)} ${isImperial ? 'in' : 'mm'} (${rainChance ?? 0}%)', style: TextStyle(color: Colors.white)),
                               Text('☀️ UV Index: ${uvIndex ?? 0}', style: TextStyle(color: Colors.white)),
                             ],
                           ),
@@ -330,7 +337,9 @@ class _WeatherPageState extends State<WeatherPage> {
                             builder: (_) => WardrobePage(
                               actualTemp: actualTemperature ?? 0.0,
                               uvIndex: uvIndex ?? 0,
-                              precipitationMm: precipitation ?? 0.0,
+                              precipitationMm: isImperial
+                                  ? (precipitationAmount ?? 0.0) * 25.4
+                                  : precipitationAmount ?? 0.0,
                               precipitationProb: rainChance ?? 0,
                               outfitMorning: outfitMorning?.cast<String>() ?? [],
                               outfitAfternoon: outfitAfternoon?.cast<String>() ?? [],

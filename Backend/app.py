@@ -38,7 +38,9 @@ def get_weather(lat, lon, units='imperial'):
         "current": "temperature_2m,apparent_temperature,precipitation,cloudcover,wind_speed_10m,relative_humidity_2m,uv_index",
         "hourly": "temperature_2m,cloudcover,precipitation_probability,wind_speed_10m",
         "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max",
-        "timezone": "auto"
+        "timezone": "auto",
+        "windspeed_unit": "ms",
+        "precipitation_unit": "inch" if units == "imperial" else "mm",
     }
 
     response = requests.get(url, params=params)
@@ -61,7 +63,7 @@ def get_weather(lat, lon, units='imperial'):
     today_min = daily["temperature_2m_min"][0]
     precip_chance = daily.get("precipitation_probability_max", [0])[0]
     rain_chance = max(data['hourly']['precipitation_probability'])  # in %
-    precip_mm = data['current']['precipitation']  # in mm
+    precip_amount = data['current']['precipitation']
 
     time_index = {t: i for i, t in enumerate(hourly["time"])}
 
@@ -90,9 +92,9 @@ def get_weather(lat, lon, units='imperial'):
         "actual_temperature": round(convert_c_to_unit(temp_c), 1),
         "feels_like_temperature": round(convert_c_to_unit(feels_like_c), 1),
         "wind_speed": round(wind_speed_val),
-        "precipitation": round(precip_chance),
-        "rain_chance" : round(rain_chance),
-        "precip_mm" : round(precip_mm),
+        "precipitation": round(precip_amount, 2),
+        "precipitation_probability": round(precip_chance),
+        "rain_chance": round(rain_chance),
         "cloud_cover": round(cloud, 1),
         "humidity": round(humidity, 1),
         "uv_index": round(uv_index),
@@ -193,9 +195,9 @@ def recommend():
         "humidity": weather["humidity"],
         "cloud_cover": weather["cloud_cover"],
         "wind_speed": weather["wind_speed"],
-        "precipitation": weather["precipitation"],  # % chance
+        "precipitation": weather["precipitation"],
+        "precipitation_probability": weather["precipitation_probability"],
         "rain_chance": weather["rain_chance"],
-        "precip_mm": weather["precip_mm"],
         "uv_index": weather["uv_index"],
         "high_temp": weather["high_temp"],
         "low_temp": weather["low_temp"],
