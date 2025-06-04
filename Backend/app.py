@@ -35,9 +35,19 @@ def get_weather(lat, lon, units='imperial'):
     params = {
         "latitude": lat,
         "longitude": lon,
-        "current": "temperature_2m,apparent_temperature,precipitation,cloudcover,wind_speed_10m,relative_humidity_2m,uv_index",
-        "hourly": "temperature_2m,cloudcover,precipitation_probability,wind_speed_10m",
-        "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+        "current": (
+            "temperature_2m,apparent_temperature,precipitation,cloudcover,"
+            "wind_speed_10m,relative_humidity_2m,uv_index,dew_point_2m,"
+            "weather_code"
+        ),
+        "hourly": (
+            "temperature_2m,cloudcover,precipitation_probability,wind_speed_10m,"
+            "wind_gusts_10m"
+        ),
+        "daily": (
+            "temperature_2m_max,temperature_2m_min,precipitation_probability_max,"
+            "sunrise,sunset"
+        ),
         "timezone": "auto",
         "windspeed_unit": "ms",
         "precipitation_unit": "inch" if units == "imperial" else "mm",
@@ -58,7 +68,9 @@ def get_weather(lat, lon, units='imperial'):
     wind_mps = current["wind_speed_10m"]
     cloud = current["cloudcover"]
     humidity = current["relative_humidity_2m"]
+    dew_point_c = current.get("dew_point_2m")
     uv_index = current.get("uv_index", 0)
+    weather_code = current.get("weather_code")
     today_max = daily["temperature_2m_max"][0]
     today_min = daily["temperature_2m_min"][0]
     precip_chance = daily.get("precipitation_probability_max", [0])[0]
@@ -78,9 +90,15 @@ def get_weather(lat, lon, units='imperial'):
             return None
         return {
             "temp": convert_c_to_unit(hourly["temperature_2m"][idx]),
-            "wind": round(hourly["wind_speed_10m"][idx] * (2.23694 if units == "imperial" else 1)),
+            "wind": round(
+                hourly["wind_speed_10m"][idx] * (2.23694 if units == "imperial" else 1)
+            ),
+            "gust": round(
+                hourly.get("wind_gusts_10m", [0])[idx]
+                * (2.23694 if units == "imperial" else 1)
+            ),
             "cloud": hourly["cloudcover"][idx],
-            "rain": hourly["precipitation_probability"][idx]
+            "rain": hourly["precipitation_probability"][idx],
         }
 
     city = reverse_geocode(lat, lon)
@@ -97,9 +115,13 @@ def get_weather(lat, lon, units='imperial'):
         "rain_chance": round(rain_chance),
         "cloud_cover": round(cloud, 1),
         "humidity": round(humidity, 1),
+        "dew_point": round(convert_c_to_unit(dew_point_c), 1) if dew_point_c is not None else None,
         "uv_index": round(uv_index),
+        "weather_code": weather_code,
         "high_temp": round(convert_c_to_unit(today_max), 1),
         "low_temp": round(convert_c_to_unit(today_min), 1),
+        "sunrise": daily.get("sunrise", [None])[0],
+        "sunset": daily.get("sunset", [None])[0],
         "hourly_forecast": {
             "morning": get_hour_data(8),
             "afternoon": get_hour_data(14),

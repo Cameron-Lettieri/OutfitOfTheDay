@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'wardrobe_page.dart';
+import 'history_page.dart';
 import 'package:weather_icons/weather_icons.dart';
 import 'recommendation_service.dart';
 
@@ -52,9 +53,12 @@ class _WeatherPageState extends State<WeatherPage> {
   double? humidity;
   double? cloudCover;
   double? windSpeed;
+  double? dewPoint;
   double? precipitationAmount;
   int? rainChance;
   int? uvIndex;
+  String? sunrise;
+  String? sunset;
   bool isImperial = true;
   List<dynamic>? outfitMorning;
   List<dynamic>? outfitAfternoon;
@@ -109,12 +113,15 @@ class _WeatherPageState extends State<WeatherPage> {
         humidity = (data['humidity'] as num?)?.toDouble();
         cloudCover = (data['cloud_cover'] as num?)?.toDouble();
         windSpeed = (data['wind_speed'] as num?)?.toDouble();
+        dewPoint = (data['dew_point'] as num?)?.toDouble();
         precipitationAmount =
             (data['precipitation'] as num?)?.toDouble();
         rainChance =
             (data['precipitation_probability'] as num?)?.toInt();
         isImperial = (data['units'] ?? '°F') == '°F';
         uvIndex = (data['uv_index'] as num?)?.toInt();
+        sunrise = data['sunrise'] as String?;
+        sunset = data['sunset'] as String?;
         
         // base outfit suggestions
         List<dynamic> baseOutfit = List<dynamic>.from(data['outfit'] ?? []);
@@ -298,6 +305,12 @@ class _WeatherPageState extends State<WeatherPage> {
                               Text('🌬 Wind: ${windSpeed?.toStringAsFixed(1)} mph', style: TextStyle(color: Colors.white)),
                               Text('🌧 Precipitation: ${precipitationAmount?.toStringAsFixed(2)} ${isImperial ? 'in' : 'mm'} (${rainChance ?? 0}%)', style: TextStyle(color: Colors.white)),
                               Text('☀️ UV Index: ${uvIndex ?? 0}', style: TextStyle(color: Colors.white)),
+                              if (dewPoint != null)
+                                Text('🌡 Dew Point: ${dewPoint!.toStringAsFixed(1)}°${isImperial ? 'F' : 'C'}', style: TextStyle(color: Colors.white)),
+                              if (sunrise != null)
+                                Text('🌅 Sunrise: $sunrise', style: TextStyle(color: Colors.white)),
+                              if (sunset != null)
+                                Text('🌇 Sunset: $sunset', style: TextStyle(color: Colors.white)),
                             ],
                           ),
                         ),
@@ -349,6 +362,19 @@ class _WeatherPageState extends State<WeatherPage> {
                         ),
                         icon: Icon(Icons.edit),
                         label: Text('My Wardrobe'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: themeColor,
+                          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          textStyle: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton.icon(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const HistoryPage()),
+                        ),
+                        icon: Icon(Icons.history),
+                        label: Text('History'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: themeColor,
                           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
