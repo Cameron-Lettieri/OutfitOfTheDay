@@ -1,0 +1,55 @@
+# --- Flutter ---
+**/build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+.idea/
+.vscode/
+*.iml
+
+# --- iOS ---
+ios/Pods/
+ios/Runner.xcworkspace/
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+
+# --- Android ---
+android/.gradle/
+android/app/build/
+android/local.properties
+android/.idea/
+*.keystore
+
+# --- Web ---
+web/.dart_tool/
+
+# --- MacOS ---
+macos/Flutter/ephemeral/
+
+# --- Linux ---
+linux/flutter/ephemeral/
+
+# --- Windows ---
+windows/flutter/ephemeral/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+.venv
+env/
+venv/
+
+# --- Logs & Misc ---
+*.log
+*.lock
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
