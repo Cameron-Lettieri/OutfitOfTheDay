@@ -36,6 +36,10 @@ class _WardrobePageState extends State<WardrobePage> {
     'accessories': [],
   };
 
+  final TextEditingController _morningCtrl = TextEditingController();
+  final TextEditingController _afternoonCtrl = TextEditingController();
+  final TextEditingController _nightCtrl = TextEditingController();
+
   final Map<String, TextEditingController> _controllers = {
     'tops': TextEditingController(),
     'bottoms': TextEditingController(),
@@ -47,6 +51,9 @@ class _WardrobePageState extends State<WardrobePage> {
   @override
   void initState() {
     super.initState();
+    _morningCtrl.text = widget.outfitMorning.join(', ');
+    _afternoonCtrl.text = widget.outfitAfternoon.join(', ');
+    _nightCtrl.text = widget.outfitNight.join(', ');
     _loadWardrobe();
   }
 
@@ -55,6 +62,9 @@ class _WardrobePageState extends State<WardrobePage> {
     for (var c in _controllers.values) {
       c.dispose();
     }
+    _morningCtrl.dispose();
+    _afternoonCtrl.dispose();
+    _nightCtrl.dispose();
     super.dispose();
   }
 
@@ -62,11 +72,6 @@ class _WardrobePageState extends State<WardrobePage> {
     final data = await StorageService.loadWardrobe();
     setState(() {
       _wardrobe = data;
-      for (var item in widget.outfitMorning +
-          widget.outfitAfternoon +
-          widget.outfitNight) {
-        _selected[item] = false;
-      }
       for (var list in _wardrobe.values) {
         for (var item in list) {
           _selected[item] = false;
@@ -75,26 +80,15 @@ class _WardrobePageState extends State<WardrobePage> {
     });
   }
 
-  Widget _buildSection(String title, List<String> items) {
+  Widget _buildSection(String title, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        TextField(
+          controller: controller,
+          decoration: InputDecoration(hintText: 'Comma separated items'),
         ),
-        ...items.map((item) {
-          return CheckboxListTile(
-            title: Text(item),
-            value: _selected[item],
-            onChanged: (val) {
-              setState(() {
-                _selected[item] = val!;
-              });
-            },
-            controlAffinity: ListTileControlAffinity.leading,
-          );
-        }),
         SizedBox(height: 16),
       ],
     );
@@ -206,13 +200,29 @@ class _WardrobePageState extends State<WardrobePage> {
         .map((e) => e.key)
         .toList();
 
+    List<String> parseManual(TextEditingController c) {
+      return c.text
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+
+    final manualItems = [
+      ...parseManual(_morningCtrl),
+      ...parseManual(_afternoonCtrl),
+      ...parseManual(_nightCtrl),
+    ];
+
+    final allItems = {...chosenItems, ...manualItems}.toList();
+
     final record = OutfitRecord(
       date: DateTime.now(),
       temp: widget.actualTemp,
       uvIndex: widget.uvIndex,
       precipitationMm: widget.precipitationMm,
       precipitationProb: widget.precipitationProb,
-      items: chosenItems,
+      items: allItems,
     );
 
     await StorageService.saveRecord(record);
@@ -237,9 +247,9 @@ class _WardrobePageState extends State<WardrobePage> {
                 style: TextStyle(fontSize: 16),
               ),
               SizedBox(height: 24),
-              _buildSection('👕 Morning', widget.outfitMorning),
-              _buildSection('🌞 Afternoon', widget.outfitAfternoon),
-              _buildSection('🌙 Night', widget.outfitNight),
+              _buildSection('👕 Morning', _morningCtrl),
+              _buildSection('🌞 Afternoon', _afternoonCtrl),
+              _buildSection('🌙 Night', _nightCtrl),
               Divider(height: 32),
               _buildCategory('Tops', 'tops'),
               _buildCategory('Bottoms', 'bottoms'),
