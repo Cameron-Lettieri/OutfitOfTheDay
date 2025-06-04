@@ -12,10 +12,17 @@ class RecommendationService {
     final history = await StorageService.loadHistory();
 
     // Filter by "close enough" weather: within ±5°F, same rain class, etc.
+    // Group precipitation probability so we aren't matching exact values
+    int bucket(int prob) {
+      if (prob < 20) return 0; // 0-19%
+      if (prob < 50) return 1; // 20-49%
+      return 2; // 50%+
+    }
+
     final filtered = history.where((r) {
-      return (r.temp - temp).abs() <= 5
-          && (r.precipitationProb == precipitationProb)
-          && (r.uvIndex - uvIndex).abs() <= 2;
+      return (r.temp - temp).abs() <= 5 &&
+          bucket(r.precipitationProb) == bucket(precipitationProb) &&
+          (r.uvIndex - uvIndex).abs() <= 2;
     }).toList();
 
     final freq = <String, int>{};
