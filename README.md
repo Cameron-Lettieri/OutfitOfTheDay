@@ -51,6 +51,8 @@ WeatherStyle/
 - Flask + CORS
 - Open-Meteo API (no key required)
 
+---
+
 ### 1. Clone the Repository
 
 git clone https://github.com/YOUR_USERNAME/weather-style.git
