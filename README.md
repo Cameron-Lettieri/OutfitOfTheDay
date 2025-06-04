@@ -10,6 +10,7 @@
 - 🤖 **AI Outfit Suggestions**:
   - Distinct recommendations for **morning**, **afternoon**, and **night**.
   - Factors in temperature, humidity, cloud cover, wind speed, chance of rain, and UV index.
+  - Wind speed is reported in **MPH** when using imperial units or **m/s** for metric users.
 - 🧥 **Wardrobe Customization**:
   - Users can build and manage their own wardrobe.
   - Future updates will learn from user preferences to personalize recommendations.
