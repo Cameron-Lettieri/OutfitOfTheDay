@@ -36,6 +36,9 @@ WeatherStyle/
 │ ├── lib/
 │ │ ├── main.dart # Flutter UI logic and API calls
 │ │ └── wardrobe_page.dart
+│ │ └── storage_service.dart
+│ │ └── reccomendation_service.dart
+│ │ └── outfit_record.dart
 │ ├── assets/ # All image assets used by Flutter
 │ │ └── images/
 │ └── pubspec.yaml
